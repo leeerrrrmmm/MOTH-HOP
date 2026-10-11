@@ -2,12 +2,16 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:moth_hop/core/app_assets/app_assets.dart';
 import 'package:moth_hop/core/components/app_image_widget.dart';
+import 'package:moth_hop/core/progress/progress_store.dart';
+import 'package:moth_hop/feature/game/engine/game_cfg/game_config.dart';
 import 'package:moth_hop/feature/home/presentation/widgets/arc_carousel.dart';
+import 'package:moth_hop/router/routes.dart';
 
 class HomeScreen extends StatefulWidget {
-  const new({super.key});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -27,6 +31,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final store = ProgressStore.instance;
+    return ListenableBuilder(
+      listenable: store,
+      builder: (context, _) {
+        final yarns = store.totalYarns;
+        final unlockedLocations = store.unlockedLocationCount;
+        return _buildScaffold(yarns, unlockedLocations);
+      },
+    );
+  }
+
+  Widget _buildScaffold(int yarns, int unlockedLocations) {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
@@ -62,14 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             // COUNT BUTTON
-                            // Padding(
-                            //   padding: EdgeInsets.only(bottom: 114.h),
-                            //   child: AppImageWidget(
-                            //     AppAssets.counBtn,
-                            //     width: 60.w,
-                            //     height: 30.w,
-                            //   ),
-                            // ),
+
                             Container(
                               margin: EdgeInsets.only(bottom: 114.h),
                               width: 60.w,
@@ -92,10 +101,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: Center(
                                       child: Text(
                                         textAlign: TextAlign.center,
-                                        '200',
+                                        yarns.toString(),
                                         style: TextStyle(
-                                          //! 12 or 14 (200 -> 12, 2000 or 200k(more than 3 symbols) -> 14)
-                                          fontSize: 14.sp,
+                                          fontSize: yarns.toString().length > 3
+                                              ? 12.sp
+                                              : 14.sp,
                                           fontWeight: FontWeight.w400,
                                           fontFamily: 'Litia',
                                           color: Color(0xFFFCE6CA),
@@ -227,10 +237,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    AppImageWidget(
-                      AppAssets.playBtn,
-                      width: 90.w,
-                      height: 90.w,
+                    // Play Button
+                    GestureDetector(
+                      onTap: () => context.push(Routes.game),
+                      child: AppImageWidget(
+                        AppAssets.playBtn,
+                        width: 90.w,
+                        height: 90.w,
+                      ),
                     ),
                     //! Flexible(child: ArcCarousel(itemCount: 5)),
                     //SCORE AND SHOP BUTTONS
@@ -243,12 +257,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          // Score Button
                           AppImageWidget(
                             AppAssets.scoreBtn,
                             width: 44.w,
                             height: 44.w,
                             fit: BoxFit.fill,
                           ),
+                          // Shop Button
                           AppImageWidget(
                             AppAssets.shopBtn,
                             width: 44.w,
@@ -263,7 +279,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          Positioned.fill(top: 190.h, child: ArcCarousel(itemCount: 5)),
+          Positioned.fill(
+            top: 190.h,
+            child: ArcCarousel(
+              itemCount: GameConfig.locationCount,
+              unlockedCount: unlockedLocations,
+              initialIndex: unlockedLocations - 1,
+            ),
+          ),
         ],
       ),
     );

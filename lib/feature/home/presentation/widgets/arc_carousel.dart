@@ -9,11 +9,15 @@ class ArcCarousel extends StatefulWidget {
     super.key,
     required this.itemCount,
     this.visibleCount = 5,
+    this.unlockedCount = 1,
+    this.initialIndex = 0,
     this.onSelected,
   });
 
   final int itemCount;
   final int visibleCount;
+  final int unlockedCount;
+  final int initialIndex;
   final ValueChanged<int>? onSelected;
 
   @override
@@ -24,10 +28,10 @@ class _ArcCarouselState extends State<ArcCarousel>
     with SingleTickerProviderStateMixin {
   final List<String> images = [
     AppAssets.arcCarousel1,
-    AppAssets.arcCarousel2,
-    AppAssets.arcCarousel3,
-    AppAssets.arcCarousel4,
     AppAssets.arcCarousel5,
+    AppAssets.arcCarousel4,
+    AppAssets.arcCarousel3,
+    AppAssets.arcCarousel2,
   ];
 
   static const _startAngle = math.pi / 120;
@@ -41,12 +45,23 @@ class _ArcCarouselState extends State<ArcCarousel>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController.unbounded(vsync: this, value: 0)
-      ..addListener(_notifySelected);
+    _ctrl = AnimationController.unbounded(
+      vsync: this,
+      value: widget.initialIndex - _centerSlot,
+    )..addListener(_notifySelected);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _notifySelected();
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant ArcCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.unlockedCount != oldWidget.unlockedCount ||
+        widget.initialIndex != oldWidget.initialIndex) {
+      _animateTo(widget.initialIndex - _centerSlot);
+    }
   }
 
   @override
@@ -190,6 +205,7 @@ class _ArcCarouselState extends State<ArcCarousel>
 
   Widget _circleAvatar(int index, double size, bool isSelected) {
     final imageIndex = index % images.length;
+    final isUnlocked = index < widget.unlockedCount.clamp(1, widget.itemCount);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
@@ -207,7 +223,9 @@ class _ArcCarouselState extends State<ArcCarousel>
             ),
         ],
         image: DecorationImage(
-          image: AssetImage(images[imageIndex]),
+          image: AssetImage(
+            isUnlocked ? images[imageIndex] : AppAssets.blockedLevel,
+          ),
           fit: BoxFit.cover,
         ),
       ),

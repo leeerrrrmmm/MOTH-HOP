@@ -4,15 +4,17 @@ import 'package:moth_hop/router/app_router.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(375, 812),
-      builder: (context, child) => SafeArea(
-        child: MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          routerConfig: appRouter,
-        ),
+      designSize: const Size(360, 640),
+      minTextAdapt: false,
+      splitScreenMode: false,
+      fontSizeResolver: FontSizeResolvers.width,
+      builder: (context, child) => MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        routerConfig: appRouter,
       ),
     );
   }

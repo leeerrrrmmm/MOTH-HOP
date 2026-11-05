@@ -1,9 +1,17 @@
+import 'package:flutter/widgets.dart';
+
 class AppAssets {
   const AppAssets._();
 
-  static const String splashBackground = 'assets/images/splash.png';
   static const String logo = 'assets/images/logo.png';
   static const String mainCharacter = 'assets/images/main_character.png';
+  static const String secondCharacter = 'assets/images/second_chapter.png';
+  static const String thirdCharacter = 'assets/images/third_chapter.png';
+  static const List<String> characters = [
+    mainCharacter,
+    secondCharacter,
+    thirdCharacter,
+  ];
   static const String mainPillow = 'assets/images/main_pillow.png';
   static const String bottomElement = 'assets/images/bottom_element.png';
   static const String settingsIcon = 'assets/images/btn_settings.png';
@@ -31,6 +39,8 @@ class AppAssets {
   static const String fBackgroundSelector =
       'assets/images/f_game_background_selector.png';
 
+  static const String thirdBackground = 'assets/images/third_back.png';
+
   static const String arcCarousel4 = 'assets/images/level_1.png';
   static const String arcCarousel2 = 'assets/images/level_2.png';
   static const String arcCarousel1 = 'assets/images/level_3.png';
@@ -41,6 +51,64 @@ class AppAssets {
 
   static const String gameBackground1 = 'assets/images/game_bg_1.png';
   static const String gameBackground2 = 'assets/images/game_bg_2.png';
+  static const String gameBackground3 = 'assets/images/game_bg_3.png';
+  static const String gameBackground4 = 'assets/images/game_bg_4.png';
+  static const String gameBackground5 = 'assets/images/game_bg_5.png';
+  static const List<String> gameBackgrounds = [
+    gameBackground1,
+    gameBackground2,
+    gameBackground3,
+    gameBackground4,
+    gameBackground5,
+  ];
+  static const List<String> homeBackgrounds = [
+    fBackgroundSelector,
+    'assets/images/second_back.png',
+    'assets/images/third_back.png',
+    'assets/images/fourth_back.png',
+    'assets/images/fifth_back.png',
+  ];
+
+  static String characterForSkin(int skin) =>
+      characters[skin.clamp(0, 2).toInt()];
+
+  static String homeBackgroundForLocation(int location) =>
+      homeBackgrounds[location.clamp(0, homeBackgrounds.length - 1).toInt()];
+
+  static String gameBackgroundForLocation(int location) =>
+      gameBackgrounds[location.clamp(0, gameBackgrounds.length - 1).toInt()];
+
+  static ({int width, int? height}) cacheSize(
+    BuildContext context,
+    String path,
+  ) {
+    final size = MediaQuery.sizeOf(context);
+    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+    final screenWidth = (size.width * pixelRatio)
+        .round()
+        .clamp(1, 4096)
+        .toInt();
+    final screenHeight = (size.height * pixelRatio)
+        .round()
+        .clamp(1, 4096)
+        .toInt();
+    final isFullScreenImage =
+        path == bottomElement ||
+        homeBackgrounds.contains(path) ||
+        gameBackgrounds.contains(path);
+    if (isFullScreenImage) {
+      return (width: screenWidth, height: screenHeight);
+    }
+
+    final scale =
+        characters.contains(path) || path == logo || path == mainPillow
+        ? 0.9
+        : 0.24;
+    return (
+      width: (screenWidth * scale).round().clamp(1, screenWidth).toInt(),
+      height: null,
+    );
+  }
 
   static const String _imagesPrefix = 'assets/images/';
 
@@ -52,7 +120,7 @@ class AppAssets {
   }
 
   static List<String> get flameGameImages => [
-    flameName(mainCharacter),
+    ...characters.map(flameName),
     flameName(normalPlatform),
     flameName(fragilePlatform),
     flameName(breakablePlatform),
@@ -62,15 +130,13 @@ class AppAssets {
     flameName(teleportPlatform),
     flameName(movingPlatform),
     flameName(spikePlatform),
-    flameName(gameBackground1),
-    flameName(gameBackground2),
+    ...gameBackgrounds.map(flameName),
   ];
 
   /// Усі ассети для прелоаду.
   static const List<String> all = [
-    splashBackground,
     logo,
-    mainCharacter,
+    ...characters,
     mainPillow,
     bottomElement,
     settingsIcon,
@@ -83,14 +149,17 @@ class AppAssets {
     btnVibrationOn,
     btnVibrationOff,
     fBackgroundSelector,
+    'assets/images/second_back.png',
+    'assets/images/third_back.png',
+    'assets/images/fourth_back.png',
+    'assets/images/fifth_back.png',
     arcCarousel1,
     arcCarousel2,
     arcCarousel3,
     arcCarousel4,
     arcCarousel5,
     blockedLevel,
-    gameBackground1,
-    gameBackground2,
+    ...gameBackgrounds,
     pauseBtn,
     normalPlatform,
     fragilePlatform,

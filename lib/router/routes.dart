@@ -5,6 +5,8 @@ class Routes {
   static const String home = '/home';
   static const String game = '/game';
   static const String pause = '/pause';
+  static const String shop = '/shop';
+  static const String score = '/score';
   static const String about = '/about';
   static const String privacy = '/privacy';
   static const String faq = '/faq';

@@ -8,11 +8,14 @@ import 'package:go_router/go_router.dart';
 import 'package:moth_hop/core/app_assets/app_assets.dart';
 import 'package:moth_hop/core/components/app_image_widget.dart';
 import 'package:moth_hop/core/progress/progress_store.dart';
+import 'package:moth_hop/core/progress/yarn_count_formatter.dart';
 import 'package:moth_hop/feature/game/engine/game_world/game_world.dart';
 import 'package:moth_hop/router/routes.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+  const GameScreen({super.key, required this.location});
+
+  final int location;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -25,6 +28,8 @@ class _GameScreenState extends State<GameScreen> {
   bool _roundSaved = false;
 
   late final GameWorld _game = GameWorld(
+    location: widget.location,
+    skin: ProgressStore.instance.selectedSkin,
     onScoreChanged: (score, yarns) {
       if (!mounted) return;
       if (_score == score && _yarns == yarns) return;
@@ -97,60 +102,64 @@ class _GameScreenState extends State<GameScreen> {
                     margin: EdgeInsets.only(bottom: 114.h),
                     width: 60.w,
                     height: 70.w,
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage(AppAssets.counBtn),
-                      ),
-                    ),
-                    child: Align(
-                      alignment: Alignment.bottomRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          right: 6.0,
-                          bottom: 30.0,
-                        ),
-                        child: SizedBox(
-                          width: 30.w,
-                          height: 14.w,
-                          child: Center(
-                            child: Text(
-                              '$_yarns',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: 'Litia',
-                                color: const Color(0xFFFCE6CA),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        AppImageWidget(AppAssets.counBtn, fit: BoxFit.contain),
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              right: 10.0,
+                              bottom: 35.0,
+                            ),
+                            child: SizedBox(
+                              width: 30.w,
+                              height: 14.w,
+                              child: Center(
+                                child: Text(
+                                  YarnCountFormatter.format(_yarns),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w400,
+                                    fontFamily: 'Litia',
+                                    color: const Color(0xFFFCE6CA),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      CurlTextWidget(
-                        text: 'Score',
-                        fontSize: 26.sp,
-                        textColor: const Color(0xFFCB832B),
-                        strokeColor: Colors.white,
-                        strokeWidth: 2,
-                        fontFamily: 'Litia',
-                        letterSpacing: 1,
-                      ),
-                      CurlTextWidget(
-                        text: _score.toString().padLeft(4, '0'),
-                        fontSize: 18.sp,
-                        textColor: const Color(0xFF915B1F),
-                        strokeColor: Colors.white,
-                        strokeWidth: 2,
-                        fontFamily: 'Litia',
-                        letterSpacing: 1,
-                      ),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.only(top: 28.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        CurlTextWidget(
+                          text: 'Score',
+                          fontSize: 26.sp,
+                          textColor: const Color(0xFFCB832B),
+                          strokeColor: Colors.white,
+                          strokeWidth: 2,
+                          fontFamily: 'Litia',
+                          letterSpacing: 1,
+                        ),
+                        CurlTextWidget(
+                          text: _score.toString().padLeft(4, '0'),
+                          fontSize: 18.sp,
+                          textColor: const Color(0xFF915B1F),
+                          strokeColor: Colors.white,
+                          strokeWidth: 2,
+                          fontFamily: 'Litia',
+                          letterSpacing: 1,
+                        ),
+                      ],
+                    ),
                   ),
                   GestureDetector(
                     onTap: _openPause,
@@ -222,37 +231,39 @@ class _GameOverOverlay extends StatelessWidget {
                 letterSpacing: 1,
               ),
               SizedBox(height: 12.h),
-              Container(
+              SizedBox(
                 width: 60.w,
                 height: 70.w,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(AppAssets.counBtn),
-                  ),
-                ),
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 6.0, bottom: 30.0),
-                    child: SizedBox(
-                      width: 30.w,
-                      height: 14.w,
-                      child: Center(
-                        child: Text(
-                          '$yarns',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: yarns.toString().length > 3
-                                ? 12.sp
-                                : 14.sp,
-                            fontWeight: FontWeight.w400,
-                            fontFamily: 'Litia',
-                            color: const Color(0xFFFCE6CA),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    AppImageWidget(AppAssets.counBtn, fit: BoxFit.contain),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          right: 6.0,
+                          bottom: 30.0,
+                        ),
+                        child: SizedBox(
+                          width: 30.w,
+                          height: 18.w,
+                          child: Center(
+                            child: Text(
+                              YarnCountFormatter.format(yarns),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: 'Litia',
+                                color: const Color(0xFFFCE6CA),
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
               SizedBox(height: 28.h),

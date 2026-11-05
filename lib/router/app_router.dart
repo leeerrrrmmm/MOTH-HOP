@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:moth_hop/feature/game/presentation/game_screen.dart';
 import 'package:moth_hop/feature/game/presentation/pause_screen.dart';
 import 'package:moth_hop/feature/home/presentation/home_screen.dart';
+import 'package:moth_hop/feature/home/presentation/score_screen.dart';
+import 'package:moth_hop/feature/home/presentation/shop_screen.dart';
+import 'package:moth_hop/core/progress/progress_store.dart';
 import 'package:moth_hop/feature/splash_screen.dart';
 import 'package:moth_hop/router/routes.dart';
 
@@ -27,7 +30,11 @@ GoRouter appRouter = GoRouter(
       pageBuilder: (BuildContext context, GoRouterState state) {
         return CustomTransitionPage<void>(
           key: state.pageKey, // Сохраняет состояние страницы
-          child: const GameScreen(),
+          child: GameScreen(
+            location: state.extra is int
+                ? state.extra! as int
+                : ProgressStore.instance.selectedLocation,
+          ),
           transitionDuration: const Duration(
             milliseconds: 300,
           ), // Время появления
@@ -67,6 +74,13 @@ GoRouter appRouter = GoRouter(
           },
         );
       },
+    ),
+
+    GoRoute(path: Routes.shop, builder: (context, state) => const ShopScreen()),
+
+    GoRoute(
+      path: Routes.score,
+      builder: (context, state) => const ScoreScreen(),
     ),
   ],
 );

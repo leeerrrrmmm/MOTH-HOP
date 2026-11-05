@@ -20,10 +20,17 @@ import 'package:moth_hop/feature/game/engine/system/score_system.dart';
 import 'package:moth_hop/feature/game/engine/system/spawn_system.dart';
 
 class GameWorld extends FlameGame with PanDetector {
-  GameWorld({required this.onScoreChanged, required this.onGameOver});
+  GameWorld({
+    required this.onScoreChanged,
+    required this.onGameOver,
+    required this.location,
+    required this.skin,
+  });
 
   final void Function(int score, int yarns) onScoreChanged;
   final void Function() onGameOver;
+  final int location;
+  final int skin;
 
   final Random _rng = Random();
   final ScoreSystem _scoreSystem = ScoreSystem();
@@ -64,7 +71,11 @@ class GameWorld extends FlameGame with PanDetector {
     _cleanupSystem = CleanupSystem(world);
     _physicsSystem = PhysicsSystem(_ctx);
 
-    _background = ScrollingBackground(images: images, viewSize: size.clone());
+    _background = ScrollingBackground(
+      images: images,
+      viewSize: size.clone(),
+      location: location,
+    );
     await camera.backdrop.add(_background);
 
     _setupRound();
@@ -77,7 +88,7 @@ class GameWorld extends FlameGame with PanDetector {
     final startWidth = GameConfig.platformSize(PlatformKind.normal).x;
     final startX = size.x / 2 - startWidth / 2;
 
-    _player = Player(position: Vector2(size.x / 2, startY - 4))
+    _player = Player(position: Vector2(size.x / 2, startY - 4), skin: skin)
       ..velocityY = GameConfig.jumpVelocity;
     world.add(_player);
 
@@ -101,7 +112,7 @@ class GameWorld extends FlameGame with PanDetector {
     world.removeAll(world.children.toList());
     _spawnSystem.reset();
     if (_imagesReady) {
-      _background.reset();
+      _background.reset(location);
     }
     _setupRound();
   }

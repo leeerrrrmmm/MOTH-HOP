@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:moth_hop/core/app_assets/app_assets.dart';
 
 class ArcCarousel extends StatefulWidget {
@@ -77,21 +76,28 @@ class _ArcCarouselState extends State<ArcCarousel>
 
   void _notifySelected() {
     final index = _wrap((_ctrl.value + _centerSlot).round());
+    final lastUnlocked =
+        widget.unlockedCount.clamp(1, widget.itemCount).toInt() - 1;
+    if (index > lastUnlocked) {
+      _animateTo(lastUnlocked - _centerSlot);
+      return;
+    }
     if (index != _selected) {
       _selected = index;
       widget.onSelected?.call(index);
     }
   }
 
-  ({double cx, double cy, double rx, double ry, double step}) _layout() {
-    final size = MediaQuery.of(context).size;
-    final rx = size.width * 0.33;
+  ({double cx, double cy, double rx, double ry, double step}) _layout(
+    Size size,
+  ) {
+    final rx = size.width * 0.34;
     final step = 1 * rx * math.cos(_startAngle) / (widget.visibleCount - 1);
     return (
       cx: size.width / 2,
-      cy: size.height * 0.52,
+      cy: size.height * 0.44,
       rx: rx,
-      ry: size.height * 0.14,
+      ry: size.height * 0.28,
       step: step,
     );
   }
@@ -106,12 +112,14 @@ class _ArcCarouselState extends State<ArcCarousel>
 
   void _onDragUpdate(DragUpdateDetails d) {
     _ctrl.stop();
-    final step = _layout().step;
+    final rx = MediaQuery.sizeOf(context).width * 0.34;
+    final step = rx * math.cos(_startAngle) / (widget.visibleCount - 1);
     _ctrl.value -= d.delta.dx / step;
   }
 
   void _onDragEnd(DragEndDetails d) {
-    final step = _layout().step;
+    final rx = MediaQuery.sizeOf(context).width * 0.34;
+    final step = rx * math.cos(_startAngle) / (widget.visibleCount - 1);
     final velocity = d.primaryVelocity ?? 0;
     final projected = _ctrl.value - velocity / step * 0.12;
     _animateTo(projected.roundToDouble());
@@ -119,30 +127,34 @@ class _ArcCarouselState extends State<ArcCarousel>
 
   @override
   Widget build(BuildContext context) {
-    final l = _layout();
-    final itemSize = 70.w;
-    final visible = widget.visibleCount;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = Size(constraints.maxWidth, constraints.maxHeight);
+        final l = _layout(size);
+        final itemSize = math.min(size.width * 0.18, size.height * 0.34);
+        final visible = widget.visibleCount;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onHorizontalDragUpdate: _onDragUpdate,
-      onHorizontalDragEnd: _onDragEnd,
-      child: AnimatedBuilder(
-        animation: _ctrl,
-        builder: (context, _) {
-          // Берём запас слотов слева и справа, чтобы элементы появлялись с другой стороны
-          final from = (_ctrl.value - 1).floor();
-          final to = (_ctrl.value + visible + 1).ceil();
+        return GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onHorizontalDragUpdate: _onDragUpdate,
+          onHorizontalDragEnd: _onDragEnd,
+          child: AnimatedBuilder(
+            animation: _ctrl,
+            builder: (context, _) {
+              final from = (_ctrl.value - 1).floor();
+              final to = (_ctrl.value + visible + 1).ceil();
 
-          return Stack(
-            clipBehavior: Clip.none,
-            children: [
-              for (int i = from; i <= to; i++)
-                _buildItem(i, l, itemSize, visible),
-            ],
-          );
-        },
-      ),
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  for (int i = from; i <= to; i++)
+                    _buildItem(i, l, itemSize, visible),
+                ],
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -206,6 +218,8 @@ class _ArcCarouselState extends State<ArcCarousel>
   Widget _circleAvatar(int index, double size, bool isSelected) {
     final imageIndex = index % images.length;
     final isUnlocked = index < widget.unlockedCount.clamp(1, widget.itemCount);
+    final asset = isUnlocked ? images[imageIndex] : AppAssets.blockedLevel;
+    final cacheSize = AppAssets.cacheSize(context, asset);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
@@ -223,8 +237,10 @@ class _ArcCarouselState extends State<ArcCarousel>
             ),
         ],
         image: DecorationImage(
-          image: AssetImage(
-            isUnlocked ? images[imageIndex] : AppAssets.blockedLevel,
+          image: ResizeImage(
+            AssetImage(asset),
+            width: cacheSize.width,
+            height: cacheSize.height,
           ),
           fit: BoxFit.cover,
         ),

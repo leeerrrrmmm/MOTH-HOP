@@ -27,7 +27,7 @@ class GameConfig {
   static const double cameraKeepLine = 0.42;
 
   /// Score at which the closet fills with clothes.
-  static const int biomeSwitchScore = 350;
+  static const int biomeSwitchScore = 20;
 
   static const int locationCount = 5;
 
